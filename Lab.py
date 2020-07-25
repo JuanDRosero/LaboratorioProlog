@@ -4,6 +4,7 @@ import time
 prolog = Prolog()
 prolog.consult("E:/INGENIERIA DE SISTEMAS/Quinto Semestre/Modelos II/Laberinto/Laberinto.pl")
 
+
 class Penwall(turtle.Turtle):
   def __init__(self):
     turtle.Turtle.__init__(self)
@@ -65,6 +66,40 @@ def leerLaberinto():
   x = [line.split() for line in open("E:/INGENIERIA DE SISTEMAS/Quinto Semestre/Modelos II/Laberinto/laberinto.txt" , "r").readlines()]
   return x  
 
+def isIn(item,lista):
+  return  item in lista
+
+def realizarAzzets(laberinto):
+  parejas=[]
+  #Escribir el asset de inicio a 2
+  parejas +=[["inicio",2]]
+  for f in range(2,len(laberinto)-2,2):
+    for c in range(1,len(laberinto[1]),2):
+      if laberinto[f][c]!="X" and laberinto[f][c]!="0":
+        #Revisa arriba
+        if laberinto[f-1][c] !="X":
+          if laberinto[f-2][c]!="X" and laberinto[f-2][c]!="0":
+              if not isIn([laberinto[f-2][c],laberinto[f][c]],parejas):
+                  parejas +=[[laberinto[f][c],laberinto[f-2][c]]]
+        #Revisa abajo
+        if laberinto[f+1][c] !="X":
+          if laberinto[f+2][c]!="X" and laberinto[f+2][c]!="0":
+            if  not isIn([[laberinto[f+2][c]],laberinto[f][c]],parejas): 
+                parejas +=[[laberinto[f][c],laberinto[f+2][c]]]
+        #Revisa derecha
+        if laberinto[f][c+1] !="X":
+          if laberinto[f][c+2]!="X" and laberinto[f][c+2]!="0":
+             if not isIn([laberinto[f][c+2],laberinto[f][c]],parejas): 
+              parejas +=[[laberinto[f][c],laberinto[f][c+2]]]
+        #revisa izquierda
+        if laberinto[f][c-1] !="X":
+          if laberinto[f][c-2]!="X" and laberinto[f][c-2]!="0":
+             if not isIn([laberinto[f][c-2],laberinto[f][c]],parejas): 
+                 parejas +=[[laberinto[f][c],laberinto[f][c-2]]]
+
+  for item in range(len(parejas)):
+    prolog.assertz("conecta(%s,%s)" % (parejas[item][0],parejas[item][1]))
+
 def camino():
   lista = []
   for resultado in prolog.query("camino([inicio], Sol)"):
@@ -88,7 +123,7 @@ p= Penwall()
 p2= Penexplorer("Yellow")
 p3=Penexplorer("Black")
 p4= Penfood()
+realizarAzzets(leerLaberinto())
 cam = convertirString(camino())
-#cam=["fin", "32", "33", "34", "28", "27", "26", "20", "14", "15", "21", "22", "16", "10", "4", "3", "2", "inicio"]
 iniciarlab(leerLaberinto(),p,p4) 
 explorar(cam,leerLaberinto(),p2,p3)
